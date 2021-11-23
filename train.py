@@ -18,7 +18,7 @@ def define_argparser():
     p.add_argument('--pretrained_model_name', type=str, default='rinna/japanese-gpt2-medium')
     p.add_argument('--gradient_accumulation_steps', type=int, default=2)
     p.add_argument('--valid_ratio', type=float, default=.2)
-    p.add_argument('--batch_size_per_device', type=int, default=64)
+    p.add_argument('--batch_size_per_device', type=int, default=32)
     p.add_argument('--n_epochs', type=int, default=5)
 
     p.add_argument('--warmup_ratio', type=float, default=.2)
@@ -51,7 +51,7 @@ def main(config):
     # Get pretrained tokenizer.
     tokenizer = T5Tokenizer.from_pretrained(config.pretrained_model_name)
     tokenizer.do_lower_case = True
-    with open('./../data/special_token_removed.json') as f:
+    with open('./data/special_token_removed.json') as f:
         special_tokens = json.load(f)
     # Get datasets and index to label map.
     train_dataset, valid_dataset = get_datasets(
@@ -80,7 +80,7 @@ def main(config):
     model.resize_token_embeddings(len(tokenizer))
     
     training_args = TrainingArguments(
-        output_dir='./.checkpoints',
+        output_dir='./checkpoints',
         num_train_epochs=config.n_epochs,
         per_device_train_batch_size=config.batch_size_per_device,
         per_device_eval_batch_size=config.batch_size_per_device,
