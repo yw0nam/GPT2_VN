@@ -16,9 +16,9 @@ def define_argparser():
     p.add_argument('--model_fn', required=True)
     p.add_argument('--train_fn', required=True)
     p.add_argument('--pretrained_model_name', type=str, default='rinna/japanese-gpt2-medium')
-    p.add_argument('--gradient_accumulation_steps', type=int, default=2)
+    p.add_argument('--gradient_accumulation_steps', type=int, default=4)
     p.add_argument('--valid_ratio', type=float, default=.2)
-    p.add_argument('--batch_size_per_device', type=int, default=32)
+    p.add_argument('--batch_size_per_device', type=int, default=48)
     p.add_argument('--n_epochs', type=int, default=5)
 
     p.add_argument('--warmup_ratio', type=float, default=.2)
@@ -51,7 +51,7 @@ def main(config):
     # Get pretrained tokenizer.
     tokenizer = T5Tokenizer.from_pretrained(config.pretrained_model_name)
     tokenizer.do_lower_case = True
-    with open('./data/special_token_removed.json') as f:
+    with open('./data/special_token.json') as f:
         special_tokens = json.load(f)
     # Get datasets and index to label map.
     train_dataset, valid_dataset = get_datasets(
@@ -90,7 +90,7 @@ def main(config):
         evaluation_strategy='epoch',
         logging_steps=n_total_iterations // 100,
         save_steps=n_total_iterations // config.n_epochs,
-        gradient_accumulation_steps=config.gradient_accumulation_steps
+        gradient_accumulation_steps=config.gradient_accumulation_steps,
     )
     
     trainer = Trainer(
@@ -105,13 +105,13 @@ def main(config):
 
     trainer.train()
     
-    trainer.model.save_pretrained('./model/yuzubot.model')
+    trainer.model.save_pretrained('./model/yuzubot_context')
     torch.save({
-        'model': trainer.model.state_dict(),
+        # 'model': trainer.model.state_dict(),
         'config': config,
-        'vocab': None,
-        'classes': None,
-        'tokenizer': tokenizer,
+        # 'vocab': None,
+        # 'classes': None,
+        # 'tokenizer': tokenizer,
     }, config.model_fn)
 
 
